@@ -7,21 +7,22 @@ import java.net.Socket;
 
 public class Main {
 
-    public static void main(String... args) throws IOException {
+    public static void main(String... args) {
 
         while (true) {
-            ServerSocket serverSocket = new ServerSocket(8081); // порт можете выбрать любой в доступном диапазоне 0-65536. Но чтобы не нарваться на уже занятый - рекомендуем использовать около 8080
-            Socket clientSocket = serverSocket.accept(); // ждем подключения
-            PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
-            BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+            try (ServerSocket serverSocket = new ServerSocket(8081);
+                 Socket clientSocket = serverSocket.accept();
+                 PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
+                 BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()))) {
 
-            System.out.printf("New connection accepted at port:%d%n", clientSocket.getPort());
+                System.out.printf("New connection accepted at port:%d%n", clientSocket.getPort());
+                String name = in.readLine();
+                out.println(String.format("Hi %s, your port is %d", name, clientSocket.getPort()));
 
-            String name = in.readLine();
-
-            out.println(String.format("Hi %s, your port is %d", name, clientSocket.getPort()));
-
-            serverSocket.close();
+            } catch (IOException exception) {
+                exception.printStackTrace();
+                break;
+            }
         }
     }
 }
